@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup, Tag
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -94,7 +95,10 @@ def parse_page_with_selenium() -> None:
             )
             time.sleep(0.5)
             if more_button.value_of_css_property("display") == "inline-block":
-                more_button.click()
+                try:
+                    more_button.click()
+                except Exception as e:
+                    print(e)
             else:
                 products = driver.find_elements(By.CLASS_NAME, "card-body")
                 write_products_to_csv(
@@ -120,7 +124,10 @@ def parse_page_with_request() -> None:
 
 def get_all_products() -> None:
     parse_page_with_request()
-    with webdriver.Chrome() as driver:
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    with webdriver.Chrome(options=chrome_options) as driver:
         set_driver(driver)
         parse_page_with_selenium()
 
